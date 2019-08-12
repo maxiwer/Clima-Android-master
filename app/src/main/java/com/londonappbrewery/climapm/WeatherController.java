@@ -14,27 +14,36 @@ import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONObject;
+
+import cz.msebera.android.httpclient.Header;
 
 public class WeatherController extends AppCompatActivity {
-
     // Constants:
     final int REQUEST_CODE = 123;
     final String WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather";
     // App ID to use OpenWeather data
-    final String APP_ID = "e72____PLEASE_REPLACE_ME_____13";
+    final String APP_ID = "ae9b1a399fbaa801e51768d5e04ce0d7";
     // Time between location updates (5000 milliseconds or 5 seconds)
     final long MIN_TIME = 5000;
     // Distance between location updates (1000m or 1km)
     final float MIN_DISTANCE = 1000;
 
     // Setting location provider: whether it is network or GPS.
+//    String LOCATION_PROVIDER = LocationManager.GPS_PROVIDER;
     String LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER;
 
     // Member Variables:
     TextView mCityLabel;
     ImageView mWeatherImage;
     TextView mTemperatureLabel;
+    ImageButton changeCityButton;
 
     // LocationManager starts and stops updating requesting location updates
     // LocationListener will be notified if location is actually changed
@@ -50,13 +59,11 @@ public class WeatherController extends AppCompatActivity {
         mCityLabel = (TextView) findViewById(R.id.locationTV);
         mWeatherImage = (ImageView) findViewById(R.id.weatherSymbolIV);
         mTemperatureLabel = (TextView) findViewById(R.id.tempTV);
-        ImageButton changeCityButton = (ImageButton) findViewById(R.id.changeCityButton);
-
+        changeCityButton = (ImageButton) findViewById(R.id.changeCityButton);
 
         // TODO: Add an OnClickListener to the changeCityButton here:
 
     }
-
 
     // onResume() - OS runs the activity in foreground, before user's interacting.
     @Override
@@ -69,10 +76,11 @@ public class WeatherController extends AppCompatActivity {
 
     // TODO: Add getWeatherForNewCity(String city) here:
 
-
-    // TODO: Add getWeatherForCurrentLocation() here:
+    // getWeatherForCurrentLocation()
     private void getWeatherForCurrentLocation() {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        // Implementing LocationListener interface
         locationListener = new LocationListener() {
             @Override
             //Callback when location has changed.
@@ -81,7 +89,17 @@ public class WeatherController extends AppCompatActivity {
 
                 String longitude = String.valueOf(location.getLongitude());
                 String latitude = String.valueOf(location.getLatitude());
-                Log.d("Clima", "Longitude is: " + longitude + ", latitude is: " + latitude);
+
+                Log.d("Clima", "Latitude is: " + latitude);
+                Log.d("Clima", "Longitude is: " + longitude);
+
+                // a class from "loopj async http library", where we put params to request GET to server
+                RequestParams params = new RequestParams();
+                params.put("lat", latitude);
+                params.put("lon", longitude);
+                params.put("appid", APP_ID);
+                // the requesting method
+                someNetworking(params);
             }
 
             @Override
@@ -110,16 +128,15 @@ public class WeatherController extends AppCompatActivity {
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            ActivityCompat.requestPermissions(this, new String[] {LocationManager.NETWORK_PROVIDER},
-                    REQUEST_CODE);
-
+//            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CODE);
             return;
         }
+        // if location change, this method will call onLocationChanged().
         locationManager.requestLocationUpdates(LOCATION_PROVIDER, MIN_TIME, MIN_DISTANCE, locationListener);
     }
 
     //Grant user's permission
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -127,23 +144,40 @@ public class WeatherController extends AppCompatActivity {
         if (requestCode == REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d("Clima", "Permission granted");
+                getWeatherForCurrentLocation();
             } else {
                 Log.d("Clima", "Permission denied");
             }
         }
     }
 
-
     // TODO: Add letsDoSomeNetworking(RequestParams params) here:
+    private void someNetworking(RequestParams params) {
+        // the class below is used for requesting asynchronous HTTP requests
+        AsyncHttpClient httpClient = new AsyncHttpClient();
+        // implementing GET request
+        httpClient.get(WEATHER_URL, params, new JsonHttpResponseHandler() {
+            // if request was successful
+        @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+            Log.d("Clima", "onSuccess() method is called: " + response.toString());
+        }
 
+        // if request was unsuccessful
+        @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
+            Log.e("Clima", "Fail: " + e.toString());
+            Log.d("Clima", "Status code: " + statusCode);
+            Toast.makeText(WeatherController.this, "Request falied", Toast.LENGTH_SHORT).show();
+        }
+        });
+    }
 
 
     // TODO: Add updateUI() here:
 
 
-
     // TODO: Add onPause() here:
-
 
 
 }

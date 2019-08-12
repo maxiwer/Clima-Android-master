@@ -4,7 +4,6 @@ public class WeatherDataModel {
 
     // TODO: Declare the member variables here
 
-
     // TODO: Create a WeatherDataModel from a JSON:
 
 
