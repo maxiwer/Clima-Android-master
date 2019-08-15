@@ -120,15 +120,8 @@ public class WeatherController extends AppCompatActivity {
         };
 
         //starting getting updates for location via locationManager
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-//            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CODE);
             return;
         }
@@ -158,18 +151,20 @@ public class WeatherController extends AppCompatActivity {
         // implementing GET request
         httpClient.get(WEATHER_URL, params, new JsonHttpResponseHandler() {
             // if request was successful
-        @Override
+            @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-            Log.d("Clima", "onSuccess() method is called: " + response.toString());
-        }
+                Log.d("Clima", "onSuccess() method is called: " + response.toString());
+                // Getting Java object that parsed from JSON
+                WeatherDataModel weatherDataModel = WeatherDataModel.fromJSON(response);
+            }
 
-        // if request was unsuccessful
-        @Override
+            // if request was unsuccessful
+            @Override
             public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
-            Log.e("Clima", "Fail: " + e.toString());
-            Log.d("Clima", "Status code: " + statusCode);
-            Toast.makeText(WeatherController.this, "Request falied", Toast.LENGTH_SHORT).show();
-        }
+                Log.e("Clima", "Fail: " + e.toString());
+                Log.d("Clima", "Status code: " + statusCode);
+                Toast.makeText(WeatherController.this, "Request falied", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -178,6 +173,4 @@ public class WeatherController extends AppCompatActivity {
 
 
     // TODO: Add onPause() here:
-
-
 }
