@@ -15,6 +15,7 @@ public class WeatherDataModel {
     public static WeatherDataModel fromJSON(JSONObject jsonObject) {
         // Handling JSON API exceptions
         try {
+            // Create an instance of the class in order to access its fields
         WeatherDataModel weatherData = new WeatherDataModel();
 
         weatherData.city = jsonObject.getString("name");

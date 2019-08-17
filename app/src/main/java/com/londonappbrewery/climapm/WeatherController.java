@@ -156,6 +156,7 @@ public class WeatherController extends AppCompatActivity {
                 Log.d("Clima", "onSuccess() method is called: " + response.toString());
                 // Getting Java object that parsed from JSON
                 WeatherDataModel weatherDataModel = WeatherDataModel.fromJSON(response);
+                updateUI(weatherDataModel);
             }
 
             // if request was unsuccessful
@@ -170,7 +171,14 @@ public class WeatherController extends AppCompatActivity {
 
 
     // TODO: Add updateUI() here:
-
+    private void updateUI(WeatherDataModel weatherDataModel) {
+        mTemperatureLabel.setText(weatherDataModel.getTemperature());
+        mCityLabel.setText(weatherDataModel.getCity());
+        // get resource ID of weather icon images
+        int resourceID = getResources().getIdentifier(weatherDataModel.getIconName(), "drawable", getPackageName());
+        Log.d("Clima", "Resource ID is: " + resourceID);
+        mWeatherImage.setImageResource(resourceID);
+    }
 
     // TODO: Add onPause() here:
 }
